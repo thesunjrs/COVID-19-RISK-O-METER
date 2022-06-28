@@ -12,7 +12,7 @@ def cases_preprocess(raw_url):
     cases['date'] = pd.to_datetime(cases['date'])
     cases = cases.sort_values(by='date')
     grp_obj = cases.groupby(['fips'])
-    county_df = dict()
+    county_df = {}
     for i in cases['fips'].unique():
         county_df[i] = grp_obj.get_group(i).sort_values(by='date')
         county_df[i] = grp_obj.get_group(i).set_index('date',drop=True)
@@ -20,7 +20,7 @@ def cases_preprocess(raw_url):
         county_df[i]['increase in cases'] = county_df[i]['cases'].pct_change(14,freq='D')
         county_df[i].fillna(0)
 
-    cases_final_df = pd.concat([county_df[k].tail(1) for k in county_df.keys()])
+    cases_final_df = pd.concat([county_df[k].tail(1) for k in county_df])
     cases_final_df['total_infected'] = cases_final_df['daily_cases']+cases_final_df['daily_cases']*0.4*0.75
     print('cases_preprocessed')
     return cases_final_df
@@ -33,7 +33,7 @@ def rt_exc(df):
     def rt_cal(row):
         if row['increase in cases']>=median_max:
             return np.float64(1.8)
-        elif row['increase in cases']>0 and row['increase in cases']<median_max:
+        elif row['increase in cases'] > 0:
             return np.float64(1.2)
         elif row['increase in cases']==0:
             return np.float64(1)
